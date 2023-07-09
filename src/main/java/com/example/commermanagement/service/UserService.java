@@ -1,5 +1,4 @@
 package com.example.commermanagement.service;
-
 import com.example.commermanagement.dao.RoleDao;
 import com.example.commermanagement.dao.UserDao;
 import com.example.commermanagement.entity.Role;
@@ -13,50 +12,52 @@ import java.util.Set;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserDao userDao;
+
     @Autowired
     private RoleDao roleDao;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    public User registerNewUser(User user){
-return userDao.save(user);
-    }
-    public void initRoleAndUser(){
-        Role adminRole= new Role();
+
+    public void initRoleAndUser() {
+
+        Role adminRole = new Role();
         adminRole.setRoleName("Admin");
         adminRole.setRoleDescription("Admin role");
         roleDao.save(adminRole);
 
-        Role userRole= new Role();
+        Role userRole = new Role();
         userRole.setRoleName("User");
         userRole.setRoleDescription("Default role for newly created record");
         roleDao.save(userRole);
 
-
-        User adminUser= new User();
+        User adminUser = new User();
+        adminUser.setUserName("admin123");
+        adminUser.setUserPassword(getEncodedPassword("admin@pass"));
         adminUser.setUserFirstName("admin");
         adminUser.setUserLastName("admin");
-        adminUser.setUserName("admin");
-        adminUser.setUserPassword(getEncodedPassword("admin@pass"));
         Set<Role> adminRoles = new HashSet<>();
         adminRoles.add(adminRole);
         adminUser.setRole(adminRoles);
         userDao.save(adminUser);
 
-        User user= new User();
-        user.setUserFirstName("Sayf");
-        user.setUserLastName("Hajbi");
-        user.setUserName("Sayf");
-        user.setUserPassword(getEncodedPassword("sayf@pass"));
-        Set<Role> userRoles = new HashSet<>();
-        userRoles.add(userRole);
-        user.setRole(userRoles);
-        userDao.save(user);
+
     }
 
-    public String getEncodedPassword (String password){
-        return  passwordEncoder.encode(password);
+    public User registerNewUser(User user) {
+        Role role = roleDao.findById("User").get();
+        Set<Role> userRoles = new HashSet<>();
+        userRoles.add(role);
+        user.setRole(userRoles);
+        user.setUserPassword(getEncodedPassword(user.getUserPassword()));
 
+        return userDao.save(user);
+    }
+
+    public String getEncodedPassword(String password) {
+        return passwordEncoder.encode(password);
     }
 }
